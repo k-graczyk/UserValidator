@@ -17,36 +17,46 @@ class UserValidator
 
     public function validatePassword(string $password): bool
     {
-        $errors = [];
-        if (!preg_match('/[a-z]/', $password)) {
-            array_push($errors, "Hasło musi zawierać małą literę.");
-        }
-        if (!preg_match('/[A-Z]/', $password)) {
-            array_push($errors, "Hasło musi zawierać dużą literę.");
-        }
+        $password = $this->sanitizeInput($password);
 
-        if (!preg_match('/\d/', $password)) {
-            array_push($errors, "Hasło musi zawierać cyfrę.");
-        }
+        $checks = [
+            $this->containSmallLetter($password),
+            $this->containCapitalLetter($password),
+            $this->containInt($password),
+            $this->containSpecialChar($password),
+            $this->notContainSpaces($password),
+            $this->checkLenght($password)
+        ];
 
-        if (!preg_match('/[\W_]/', $password)) {
-            array_push($errors, "Hasło musi zawierać znak specjalny");
-        }
-
-        if (preg_match('/\s/', $password)) {
-            array_push($errors, "Hasło nie może zawierać spacji");
-        }
-        if (strlen($password) < 8) {
-            array_push($errors, "Hasło musi mieć co najmniej 8 znaków.");
-        }
-        if (!empty($errors)) {
-            $errorMessage = implode("\n", $errors);
-            throw new \Exception($errorMessage);
-        }
-
-        return true;
+        return in_array(false, $checks) ? false : true;
     }
 
+    private function containSmallLetter(string $password): bool
+    {
+        return preg_match('/[a-z]/', $password) ? true : false;
+    }
+    private function containCapitalLetter($password): bool
+    {
+        return preg_match('/[A-Z]/', $password) ? true : false;
+    }
+
+    private function containInt($password): bool
+    {
+        return preg_match('/\d/', $password) ? true : false;
+    }
+    private function containSpecialChar($password): bool
+    {
+        return preg_match('/[\W_]/', $password) ? true : false;
+    }
+    private function notContainSpaces($password): bool
+    {
+        return !preg_match('/\s/', $password) ? true : false;
+    }
+
+    private function checkLenght($password): bool
+    {
+        return strlen($password) >= 8 ? true : false;
+    }
 
     private function sanitizeInput(string $input): string
     {
