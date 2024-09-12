@@ -10,9 +10,57 @@ class UserValidator
     {
         $email = $this->sanitizeInput($email);
 
-        $pattern = "/^[a-z\d]+[\w.-]*@(?:[a-z\d]+(?:-[a-z\d]+)*\.){1,5}[a-z]{2,6}$/i";
+        if (!$this->containAtSign($email)) {
+            return false;
+        }
 
-        return preg_match($pattern, $email) === 1;
+        $emailExplode = explode("@", $email);
+        $local = $emailExplode[0];
+        $fullDomain = $emailExplode[1];
+
+        if (!$this->validLocal($local)) {
+            return false;
+        }
+
+        if (!$this->containDot($fullDomain)) {
+            return false;
+        }
+
+        $domainExplode = explode(".", $fullDomain);
+        $domain = $domainExplode[0];
+        $tld = $domainExplode[1];
+
+        if (!$this->validDomain($domain)) {
+            return false;
+        }
+
+        if (!$this->validTld($tld)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function validTld(string $tld): bool
+    {
+        return preg_match("/[a-z]{2,6}/", $tld) === 1;
+    }
+    private function validDomain(string $domain): bool
+    {
+        return preg_match("/[a-z\d]+(?:-[a-z\d]+)*/", $domain) === 1;
+    }
+    private function validLocal(string $local): bool
+    {
+        return preg_match('/[a-z\d]+[\w.-]*/', $local) === 1;
+    }
+
+    private function containAtSign(string $email): bool
+    {
+        return preg_match('/@/', $email) === 1;
+    }
+    private function containDot(string $fullDomain): bool
+    {
+        return preg_match('/\./', $fullDomain) === 1;
     }
 
     public function validatePassword(string $password): bool
@@ -33,24 +81,24 @@ class UserValidator
 
     private function containSmallLetter(string $password): bool
     {
-        return preg_match('/[a-z]/', $password) ? true : false;
+        return preg_match('/[a-z]/', $password) === 1;
     }
     private function containCapitalLetter($password): bool
     {
-        return preg_match('/[A-Z]/', $password) ? true : false;
+        return preg_match('/[A-Z]/', $password) === 1;
     }
 
     private function containInt($password): bool
     {
-        return preg_match('/\d/', $password) ? true : false;
+        return preg_match('/\d/', $password) === 1;
     }
     private function containSpecialChar($password): bool
     {
-        return preg_match('/[\W_]/', $password) ? true : false;
+        return preg_match('/[\W_]/', $password) === 1;
     }
     private function notContainSpaces($password): bool
     {
-        return !preg_match('/\s/', $password) ? true : false;
+        return !preg_match('/\s/', $password);
     }
 
     private function checkLenght($password): bool
