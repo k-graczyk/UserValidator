@@ -1,4 +1,5 @@
 ## Program służący do walidacji adresu email i hasła
+Zadanie wykonane tylko pod kątem pracy z wyrażeniami regularnymi.
 
 ## Przykład użycia
 
